@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Copy, Check, ArrowRight, ArrowLeft, KeyRound } from 'lucide-react';
+import { Copy, Check, Eye, EyeOff, ArrowRight, ArrowLeft, KeyRound } from 'lucide-react';
 
 export function RegisterPage() {
   useEffect(() => { document.title = 'Create Account — FlowAlchemy'; }, []);
@@ -10,6 +10,7 @@ export function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [apiKey, setApiKey] = useState('');
+  const [showKey, setShowKey] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState<'form' | 'success'>('form');
@@ -107,14 +108,25 @@ export function RegisterPage() {
                   <p className="text-sm font-medium text-text-primary mb-2">Your API Key</p>
                   <div className="flex items-center gap-2 p-2.5 bg-bg border border-border rounded-lg">
                     <code className="flex-1 font-mono text-xs text-primary break-all leading-relaxed">
-                      {apiKey}
+                      {showKey ? apiKey : '••••••••••••••••••••••••••••••••'}
                     </code>
-                    <button
-                      onClick={copyApiKey}
-                      className="p-1.5 border border-border rounded-lg hover:bg-surface-hover hover:text-text-primary transition-colors shrink-0"
-                    >
-                      {copied ? <Check size={14} className="text-success" /> : <Copy size={14} />}
-                    </button>
+                    {apiKey && (
+                      <>
+                        <button
+                          onClick={() => setShowKey(!showKey)}
+                          className="p-1.5 border border-border rounded-lg hover:bg-surface-hover hover:text-text-primary transition-colors shrink-0"
+                          title={showKey ? 'Hide' : 'Reveal'}
+                        >
+                          {showKey ? <EyeOff size={14} /> : <Eye size={14} />}
+                        </button>
+                        <button
+                          onClick={copyApiKey}
+                          className="p-1.5 border border-border rounded-lg hover:bg-surface-hover hover:text-text-primary transition-colors shrink-0"
+                        >
+                          {copied ? <Check size={14} className="text-success" /> : <Copy size={14} />}
+                        </button>
+                      </>
+                    )}
                   </div>
                   <p className="mt-2 text-xs text-accent font-medium">
                     Save this key now — it won't be shown again.
