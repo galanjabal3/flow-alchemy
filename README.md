@@ -2,7 +2,7 @@
 
 > **Visual workflow automation engine** — a drag-and-drop workflow builder whose graphs compile to executable Python. Think Zapier-style automation with a developer-grade edge: versioning, replay, scheduling, webhooks, a visual debugger, and encrypted credential management.
 
-![Status](https://img.shields.io/badge/status-active-22d3ee) ![License](https://img.shields.io/badge/license-MIT-7c3aed)
+![CI](https://github.com/galanjabal3/flow-alchemy/actions/workflows/ci.yml/badge.svg) ![Status](https://img.shields.io/badge/status-active-22d3ee) ![License](https://img.shields.io/badge/license-MIT-7c3aed)
 
 ---
 
