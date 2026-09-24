@@ -18,8 +18,8 @@
 | **Versioning** | Every save snapshots a version; compare any two versions side-by-side and roll back | ✅ UI + API |
 | **Replay** | Re-run an execution with the same or modified input, then compare runs | ✅ API (UI in roadmap) |
 | **Python compiler** | Compile a workflow graph into a standalone, executable Python script and download it | ✅ API (UI in roadmap) |
-| **Scheduling** | Cron-based schedules (validated, minimum 5-min interval); worker picks up due runs | ✅ API (UI in roadmap) |
-| **Webhooks** | Public trigger URLs with HMAC-signed secrets to fire workflows from external services | ✅ API (UI in roadmap) |
+| **Scheduling** | Cron-based schedules (validated, minimum 5-min interval); worker picks up due runs | ✅ UI + API |
+| **Webhooks** | Public trigger URLs with HMAC-signed secrets to fire workflows from external services | ✅ UI + API |
 | **Visual debugger** | Breakpoints, step / resume / pause over WebSocket, live variable inspection | ✅ UI + API |
 | **Credentials** | AES-(Fernet)-encrypted secrets, injected via `{{cred:ID}}` placeholders, auto-redacted from execution history | ✅ UI + API |
 | **Runtime safety** | SSRF protection, rate limiting, per-user/per-total concurrency limits, node & workflow timeouts, retries with exponential backoff + jitter, idempotent worker, state machine | ✅ |
@@ -100,11 +100,11 @@ npm run dev                 # Vite dev server on :5173 (proxies /api → :8000)
 
 | | |
 |---|---|
-| ![Login](screenshots/01_Login_page_renders_correctly.png) | ![Editor canvas](screenshots/09_Editor_empty_canvas.png) |
-| ![Workflow card](screenshots/08_Dashboard_workflow_card.png) | ![Node properties](screenshots/11_Editor_select_node_shows_properties.png) |
-| ![Execution history](screenshots/13_History_tab_empty_state.png) | ![Mobile responsive](screenshots/16_Responsive_mobile_375x812.png) |
+| ![Login](docs/images/auth/01-login.png) | ![Editor canvas](docs/images/editor/01-empty-canvas.png) |
+| ![Workflow card](docs/images/dashboard/05-workflow-card.png) | ![Node properties](docs/images/editor/03-node-properties.png) |
+| ![Execution history](docs/images/history/01-history-empty.png) | ![Mobile responsive](docs/images/responsive/03-mobile.png) |
 
-Full gallery: `screenshots/` (20 captures covering auth, dashboard, editor, history, and responsive layouts).
+Full gallery: [`docs/images/`](docs/images/) (27 captures covering auth, dashboard, editor, execution, history, responsive, and settings).
 
 ## 🧪 Testing
 
@@ -117,7 +117,7 @@ cd frontend && npx playwright test
 ```
 
 - **300 backend test functions** across 23 test files (graph validation, execution engine, condition/transform/delay executors, retry/backoff, timeouts & cancellation, scheduler, webhooks/HMAC, versioning, replay, credentials & encryption, SSRF, state machine, worker idempotency).
-- **25 Playwright E2E tests** covering auth, dashboard, editor, and settings — with 20 auto-captured screenshots.
+- **25 Playwright E2E tests** covering auth, dashboard, editor, execution, history, responsive, and settings — with 27 auto-captured screenshots.
 
 ## 🗂️ Project Structure
 
@@ -132,7 +132,7 @@ flow-alchemy/
 │   │   ├── models/       # SQLAlchemy models
 │   │   ├── schemas/      # Pydantic schemas
 │   │   └── services/     # scheduler, webhook, execution-state services
-│   ├── alembic/          # migrations (001–009 + security fixes)
+│   ├── alembic/          # migrations (001, 002, 004–009 + 1 security patch)
 │   ├── tests/            # 23 test files
 │   └── Dockerfile / entrypoint.sh
 ├── frontend/
@@ -140,9 +140,9 @@ flow-alchemy/
 │   │   ├── components/   # WorkflowEditor, NodePalette, VisualDebugger, Modals…
 │   │   ├── pages/        # Landing, Login, Register, Dashboard, Workflow, Settings
 │   │   ├── hooks/ · lib/ · contexts/
-│   └── e2e/              # Playwright specs
+│   └── e2e/              # Playwright specs + capture output (git-ignored)
 ├── docker-compose.yml    # postgres + redis + backend + worker + frontend
-└── screenshots/          # E2E capture gallery
+└── docs/images/          # Screenshot gallery for the README
 ```
 
 ## 🔒 Security Notes
@@ -173,8 +173,8 @@ Swagger UI at `http://localhost:8000/docs`. WebSocket: `ws://localhost:8000/api/
 
 ## 🗺️ Roadmap
 
-- Frontend UI for scheduler, webhooks, replay & Python-export (API layer is complete and tested)
-- Redis-backed global rate limiting; stronger DNS-rebinding protection for SSRF guard
+- Frontend UI for replay & Python-export (API layer is complete and tested)
+- Stronger DNS-rebinding protection for SSRF guard
 - Fuzzy / advanced condition expressions in the visual editor UI (engine already supports full expressions)
 
 ## 📄 License

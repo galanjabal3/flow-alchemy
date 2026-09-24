@@ -57,3 +57,6 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Playwright auth state (contains access token)
+frontend/e2e/.auth/

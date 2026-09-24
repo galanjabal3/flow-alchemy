@@ -3,8 +3,8 @@
 **Project:** FlowAlchemy — Visual Workflow Automation Platform
 **Frontend:** React + TypeScript + Vite + Tailwind CSS
 **Backend:** Python FastAPI + SQLAlchemy + Redis
-**Last Updated:** 2026-09-19
-**E2E Tests:** 26/26 passing (Playwright + Chromium)
+**Last Updated:** 2026-09-24
+**E2E Tests:** 25 test cases + 1 auth setup, all passing (Playwright + Chromium)
 
 ---
 
@@ -80,7 +80,7 @@ Worker Process → WorkflowEngine → Executors → HTTP/Transform/Condition/Del
 | Auth setup project (login once, save storageState) | ✅ Done | `e2e/auth.setup.ts` |
 | Playwright config (setup → chromium dependency) | ✅ Done | `playwright.config.ts` |
 | getToken() with module-level caching | ✅ Done | `e2e/flowalchemy.spec.ts` |
-| 26 comprehensive tests (auth, dashboard, editor, execution, settings, responsive) | ✅ Done | `e2e/flowalchemy.spec.ts` |
+| 25 test cases (auth, dashboard, editor, execution, settings, responsive) | ✅ Done | `e2e/flowalchemy.spec.ts` |
 
 ---
 
@@ -257,14 +257,14 @@ Passes `user_id=execution.user_id` to `engine.execute()` (line 86).
 
 | Issue | Location | Description |
 |-------|----------|-------------|
-| **Encryption salt not persisted** | `credentials.py:61` | `EncryptionService` generates random salt per instance. On server restart, new salt = all encrypted credentials permanently unrecoverable. **Fix:** Derive salt from `settings.SECRET_KEY` or persist in database. |
-| **In-memory credential store** | `credentials.py:99` | `_credentials_store` dict loses all data on restart. **Fix:** Move to database table. |
+| **Encryption salt not persisted — ✅ FIXED** | `credentials.py:61` | `EncryptionService` generates random salt per instance. On server restart, new salt = all encrypted credentials permanently unrecoverable. **Fix:** Derive salt from `settings.SECRET_KEY` or persist in database. **(FIXED — lihat `app/core/encryption.py`, REVIEW-Round4)** |
+| **In-memory credential store — ✅ FIXED** | `credentials.py:99` | `_credentials_store` dict loses all data on restart. **Fix:** Move to database table. **(FIXED — DB-backed `credentials` table, migration 007; lihat REVIEW-Round4)** |
 
 ### Moderate
 
 | Issue | Location | Description |
 |-------|----------|-------------|
-| Silent error swallowing | `WorkflowEditor.tsx:97` | `api.get('/credentials').catch(() => {})` — should at least log errors. |
+| Silent error swallowing — ✅ FIXED | `WorkflowEditor.tsx:97` | `api.get('/credentials').catch(...)` previously swallowed errors silently — now surfaces them via `showToast('error', ...)`. |
 | Duplicate credential picker pattern | `HeadersEditor.tsx`, `BodyEditor.tsx`, `NodeConfigForm.tsx` | Same dropdown pattern repeated 3 times — extract to shared `CredentialPicker` component. |
 
 ### Minor
@@ -273,7 +273,7 @@ Passes `user_id=execution.user_id` to `engine.execute()` (line 86).
 |-------|----------|-------------|
 | `TransformParamsEditor` useEffect deps | `TransformParamsEditor.tsx:48` | Dependency array is `[operation]` only — intentionally avoids infinite loops but may trigger React lint warnings. |
 | `CREDENTIAL_PATTERN.search(str(config))` | `workflow_engine.py:132` | Converts entire config dict to string for matching — inefficient for large configs. Use recursive check instead. |
-| E2E test numbering | `flowalchemy.spec.ts` | Tests skip numbers 14-16 (placed after 13). Renumbering would improve readability. |
+| E2E test numbering | `flowalchemy.spec.ts` | Test numbering is out of order — responsive tests 14–16 appear after test 20 in the file. Renumbering would improve readability. |
 | Fragile E2E selectors | `flowalchemy.spec.ts:475+` | User menu selector `.rounded-full.bg-primary\\/20` is CSS-dependent and may break with style changes. |
 
 ---
@@ -319,7 +319,7 @@ Passes `user_id=execution.user_id` to `engine.execute()` (line 86).
 
 | File | Lines | Purpose |
 |------|-------|---------|
-| `e2e/flowalchemy.spec.ts` | 597 | 26 E2E tests (auth, dashboard, editor, execution, settings, responsive) |
+| `e2e/flowalchemy.spec.ts` | 597 | 25 E2E test cases (auth, dashboard, editor, execution, settings, responsive) |
 | `e2e/auth.setup.ts` | 24 | Auth setup project (login once, save storageState) |
 | `playwright.config.ts` | 30 | Two-project config (setup → chromium) |
 
@@ -347,7 +347,7 @@ Passes `user_id=execution.user_id` to `engine.execute()` (line 86).
 ```
 1. User creates credential via CredentialsManager
    → POST /api/credentials { name, credential_type, value }
-   → Encrypted with AES-256 (Fernet) → stored in _credentials_store
+   → Encrypted with AES-256 (Fernet) → stored in the `credentials` DB table (DB-backed, migration 007)
 
 2. User configures HTTP Request node
    → HeadersEditor: {"Authorization": "Bearer {{cred:3}}"}

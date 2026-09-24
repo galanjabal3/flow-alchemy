@@ -117,7 +117,7 @@ Live execution events (`node_started`, `node_completed`, `node_failed`, `workflo
 - **API keys** — SHA-256 hash + prefix stored; plaintext column removed by migration.
 - **Webhooks** — constant-time HMAC secret validation (`hmac.compare_digest`).
 - **SSRF** — outbound executor rejects private/link-local/cloud-metadata ranges and non-HTTP schemes.
-- **Rate limiting** — in-memory token-style limiter per user/IP (interface ready for a Redis backend).
+- **Rate limiting** — Redis-backed sliding window (sorted set per key, accurate across workers/processes) with automatic in-memory fallback when Redis is unavailable (`app/core/rate_limiter.py`).
 - **Worker** — idempotency keys, guarded state-machine transitions, clear-on-done, retry backoff + jitter.
 
 ## Testing
@@ -126,4 +126,4 @@ Live execution events (`node_started`, `node_completed`, `node_failed`, `workflo
 DATABASE_URL=sqlite:// .venv/bin/python -m pytest tests/ -q
 ```
 
-290+ test functions in 22 files. Suites touching Redis/Postgres directly (async runtime, worker, timeouts) expect live services; the rest run against SQLite (see `tests/conftest.py`).
+300 test functions in 23 files. Suites touching Redis/Postgres directly (async runtime, worker, timeouts) expect live services; the rest run against SQLite (see `tests/conftest.py`).

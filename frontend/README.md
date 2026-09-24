@@ -46,7 +46,7 @@ npx playwright test --ui       # interactive UI runner
 npx playwright show-report     # HTML report after a run
 ```
 
-`e2e/auth.setup.ts` authenticates once and reuses the session for the rest of the suite (`storageState`). Screenshots are written to the `screenshots/` folder in the repo root.
+`e2e/auth.setup.ts` authenticates once and reuses the session for the rest of the suite (`storageState`). Screenshots are written to `e2e/screenshots/` (grouped by feature: `auth/`, `dashboard/`, `editor/`, `execution/`, `history/`, `responsive/`, `settings/`); curated copies for the root README live in `docs/images/`.
 
 ## Project structure
 
