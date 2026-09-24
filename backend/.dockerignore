@@ -1,0 +1,26 @@
+# Build context is ./backend — Docker only reads <context>/.dockerignore,
+# so this file (not the root one) controls what enters the backend image.
+.venv
+venv
+.env
+.env.*
+!.env.example
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.coverage
+htmlcov
+tests
+test_*.db
+*.db
+*.sqlite3
+.git
+.gitignore
+*.log
+logs
+.vscode
+.idea
+.DS_Store

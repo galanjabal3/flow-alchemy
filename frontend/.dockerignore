@@ -1,0 +1,19 @@
+# Build context is ./frontend — Docker only reads <context>/.dockerignore,
+# so this file (not the root one) controls what enters the frontend image.
+node_modules
+dist
+dist-ssr
+.env
+.env.*
+!.env.example
+e2e
+playwright-report
+test-results
+coverage
+.git
+.gitignore
+*.log
+npm-debug.log*
+.vscode
+.idea
+.DS_Store

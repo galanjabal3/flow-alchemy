@@ -1,0 +1,104 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: flowalchemy-postgres
+    restart: unless-stopped
+    ports:
+      # Localhost-only bind: reachable from the dev machine, not the LAN.
+      - "127.0.0.1:5433:5432"
+    environment:
+      POSTGRES_DB: flowalchemy
+      POSTGRES_USER: postgres
+      # Fail fast with a clear message instead of a hardcoded password.
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD wajib di-set di .env (lihat .env.example)}"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: flowalchemy-redis
+    restart: unless-stopped
+    ports:
+      # Localhost-only bind: reachable from the dev machine, not the LAN.
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data:/data
+    # NOTE on auth: Redis runs WITHOUT requirepass by default so the local
+    # dev flow (`cp .env.example .env && docker compose up --build`) works
+    # with zero extra steps. The port is localhost-bound and the service is
+    # not exposed beyond this machine, which is sufficient for local demo /
+    # small-scale use. To harden further (shared host / staging): start redis
+    # with `--requirepass` and set REDIS_URL=redis://:<pass>@redis:6379/0
+    # in .env (see .env.example). The backend already reads REDIS_URL.
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: flowalchemy-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      # Fail fast — no weak fallback. App also validates min 16 chars.
+      SECRET_KEY: "${SECRET_KEY:?SECRET_KEY wajib di-set di .env (lihat .env.example)}"
+      # Derived from the same POSTGRES_PASSWORD so the two can never drift.
+      DATABASE_URL: "postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD wajib di-set di .env}@postgres:5432/flowalchemy"
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      # Documented for future Redis-auth hardening; unused by the app today.
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:3000,http://localhost:80}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: flowalchemy-worker
+    restart: unless-stopped
+    # Same image => same ENTRYPOINT => migrations run here too (single-source
+    # policy). entrypoint.sh retries `alembic upgrade head`, so the
+    # backend/worker concurrent-boot race resolves safely; depending on the
+    # backend as well serializes the common case further.
+    command: python -m app.worker
+    environment:
+      SECRET_KEY: "${SECRET_KEY:?SECRET_KEY wajib di-set di .env (lihat .env.example)}"
+      DATABASE_URL: "postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD wajib di-set di .env}@postgres:5432/flowalchemy"
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_started
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: flowalchemy-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  redis_data:

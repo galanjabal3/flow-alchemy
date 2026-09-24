@@ -1,0 +1,53 @@
+/* React Flow dark theme overrides */
+
+/* Hide attribution completely */
+:root {
+  --xy-attribution-background-color: transparent !important;
+  --xy-attribution-background-color-default: transparent !important;
+}
+
+.react-flow__attribution {
+  display: none !important;
+}
+
+/* Controls styling */
+.react-flow__controls {
+  background: var(--color-surface) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 8px !important;
+  box-shadow: var(--shadow-md) !important;
+  overflow: hidden;
+}
+
+.react-flow__controls button {
+  background: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+  fill: var(--color-text-primary) !important;
+  width: 28px !important;
+  height: 28px !important;
+}
+
+.react-flow__controls button:hover {
+  background: var(--color-surface-hover) !important;
+}
+
+.react-flow__controls button svg {
+  fill: var(--color-text-primary) !important;
+  max-width: 14px !important;
+  max-height: 14px !important;
+}
+
+.react-flow__controls button:first-child {
+  border-radius: 7px 7px 0 0 !important;
+}
+
+.react-flow__controls button:last-child {
+  border-radius: 0 0 7px 7px !important;
+}
+
+/* Connection line */
+.react-flow__connection-line {
+  stroke: var(--color-primary) !important;
+  stroke-width: 2;
+}
